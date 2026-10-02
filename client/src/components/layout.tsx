@@ -1,89 +1,90 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Gift, Trophy, Plus } from "lucide-react";
+import { Compass, Gift, LayoutDashboard, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
-
+  const [location, setLocation] = useLocation();
   const navItems = [
-    { href: "/", icon: LayoutDashboard, label: "Tasks" },
+    { href: "/", icon: LayoutDashboard, label: "Quests" },
     { href: "/rewards", icon: Gift, label: "Rewards" },
-    { href: "/stats", icon: Trophy, label: "Stats" },
   ];
 
-  return (
-    <div className="min-h-screen bg-background text-foreground pb-24 md:pb-0 md:pl-24 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full bg-accent/10 blur-3xl" />
-      </div>
+  const openAddQuest = () => {
+    if (location === "/") {
+      window.dispatchEvent(new CustomEvent("taskquest:open-add"));
+      return;
+    }
+    setLocation("/");
+    window.setTimeout(() => window.dispatchEvent(new CustomEvent("taskquest:open-add")), 350);
+  };
 
-      {/* Desktop Sidebar */}
-      <nav className="hidden md:flex fixed left-0 top-0 h-full w-24 flex-col items-center py-8 border-r border-border bg-card/50 backdrop-blur-xl z-50">
-        <div className="mb-8">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold shadow-lg shadow-primary/20">
-            Q
+  return (
+    <div className="relative min-h-[100dvh] overflow-hidden pb-24 text-foreground md:pb-0 md:pl-[5.5rem]">
+      <nav aria-label="Primary navigation" className="fixed left-0 top-0 z-50 hidden h-full w-[5.5rem] flex-col items-center border-r border-border/70 bg-background/90 py-6 backdrop-blur-xl md:flex">
+        <div className="mb-8 flex flex-col items-center gap-2">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md shadow-primary/20">
+            <Compass size={24} strokeWidth={2.1} />
           </div>
+          <span className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-primary">TaskQuest</span>
         </div>
-        
-        <div className="flex flex-col gap-6 w-full px-4">
+        <div className="flex w-full flex-col gap-3 px-2">
           {navItems.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link key={item.href} href={item.href}>
-                <div
-                  className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all duration-200 cursor-pointer group ${
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 scale-105"
-                      : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className="text-[10px] font-medium">{item.label}</span>
-                </div>
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={`group flex flex-col items-center gap-1 rounded-2xl p-3 transition-all duration-200 ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                    : "text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
+                }`}
+              >
+                <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span className="text-[10px] font-bold">{item.label}</span>
               </Link>
             );
           })}
+          <button type="button" onClick={openAddQuest} aria-label="Add a quest" className="mt-2 flex flex-col items-center gap-1 rounded-2xl border border-dashed border-primary/35 p-3 text-primary transition-colors hover:bg-primary/5">
+            <Plus size={22} />
+            <span className="text-[10px] font-bold">Add</span>
+          </button>
         </div>
       </nav>
 
-      {/* Mobile Bottom Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full h-20 bg-card/80 backdrop-blur-xl border-t border-border z-50 flex items-center justify-around px-4 pb-2">
-         {navItems.map((item) => {
-            const isActive = location === item.href;
-            return (
-              <Link key={item.href} href={item.href}>
-                <div
-                  className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200 cursor-pointer ${
-                    isActive
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  <div className={`p-2 rounded-full transition-all ${isActive ? "bg-primary/10" : ""}`}>
-                    <item.icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  <span className="text-[10px] font-medium">{item.label}</span>
-                </div>
-              </Link>
-            );
-          })}
-          
-          {/* Floating Action Button for Mobile */}
-          <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-            <Button 
-              size="icon" 
-              className="h-14 w-14 rounded-full bg-gradient-to-tr from-primary to-purple-400 shadow-xl shadow-primary/30 hover:shadow-primary/50 hover:scale-105 transition-all border-4 border-background"
+      <nav aria-label="Primary navigation" className="fixed bottom-0 left-0 z-50 flex h-[4.5rem] w-full items-center justify-around border-t border-border/80 bg-background/95 px-5 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
+        {navItems.map((item) => {
+          const isActive = location === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              className={`flex min-w-16 flex-col items-center gap-1 rounded-xl p-1.5 transition-all duration-200 ${
+                isActive ? "text-primary" : "text-muted-foreground"
+              }`}
             >
-              <Plus className="text-white" size={28} />
-            </Button>
-          </div>
+              <item.icon size={21} strokeWidth={isActive ? 2.5 : 1.8} />
+              <span className="text-[10px] font-bold">{item.label}</span>
+            </Link>
+          );
+        })}
+        <div className="absolute -top-5 left-1/2 -translate-x-1/2">
+          <Button
+            type="button"
+            onClick={openAddQuest}
+            aria-label="Add a quest"
+            size="icon"
+            className="h-12 w-12 rounded-2xl border-[3px] border-background bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90"
+          >
+            <Plus size={23} />
+          </Button>
+        </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="relative z-10 max-w-5xl mx-auto p-4 md:p-8">
+      <main className="relative z-10 mx-auto w-full max-w-5xl px-4 py-5 md:px-8 md:py-8">
         {children}
       </main>
     </div>
